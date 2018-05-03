@@ -1,6 +1,5 @@
 package impl;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,6 +19,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class Launcher extends Application {
@@ -40,21 +40,26 @@ public class Launcher extends Application {
 		// center
 		final TextArea textArea = new TextArea();
 		textArea.setMinHeight(400);
-		Button btn = new Button("publish");
-		// btn.setOnAction(new EventHandler<ActionEvent>() {
-		//
-		// public void handle(ActionEvent event) {
-		// // TODO Auto-generated method stub
-		// System.out.println("text published: " + textArea.getText());
-		// textArea.setText("text published: " + textArea.getText());
-		// }
-		// });
-		btn.setOnAction(new EventHandler<ActionEvent>() {
+		HBox buttonBox = new HBox();
+		Button publish = new Button("publish");
+		Button clear = new Button("clear");
+		buttonBox.getChildren().add(publish);
+		buttonBox.getChildren().add(clear);
+
+		publish.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
 				handlers.handlePublish(pane);
 			}
 		});
+		
+		clear.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				handlers.handleClear(pane);
+			}
+		});
+		
 		// BorderPane
 		pane = new BorderPane();
 		pane.setPadding(new Insets(30));
@@ -62,7 +67,8 @@ public class Launcher extends Application {
 		paneCenter.setSpacing(10);
 		pane.setCenter(paneCenter);
 		paneCenter.getChildren().add(textArea);
-		paneCenter.getChildren().add(btn);
+		paneCenter.getChildren().add(buttonBox);
+		buttonBox.setSpacing(20);
 
 		// left
 		VBox paneLeft = new VBox();
@@ -123,7 +129,7 @@ public class Launcher extends Application {
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
-		//PropertyConfigurator.configure("log4j.conf");
+		// PropertyConfigurator.configure("log4j.conf");
 		launch(args);
 	}
 

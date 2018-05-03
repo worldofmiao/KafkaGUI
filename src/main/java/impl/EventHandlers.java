@@ -9,6 +9,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
 public class EventHandlers {
+	private Commons common = new Commons();
+
 	public void handlePublish(BorderPane pane) {
 		VBox bottom = (VBox) pane.getBottom();
 		TextArea result = (TextArea) bottom.getChildren().get(1);
@@ -20,19 +22,21 @@ public class EventHandlers {
 		TextField broker = (TextField) left.getChildren().get(1);
 		TextField topic = (TextField) left.getChildren().get(3);
 		TextField partition = (TextField) left.getChildren().get(5);
-		try {
-			KafkaProducerLocal p = new KafkaProducerLocal(Integer.valueOf(partition.getText()), topic.getText(),
-					broker.getText());
-			p.execute();
-			String content = area.getText();
+		if (!common.testURL(broker.getText())) {
+			result.setText("Kafka Connection Failure");
+		} else {
+			try {
+				KafkaProducerLocal p = new KafkaProducerLocal(Integer.valueOf(partition.getText()), topic.getText(),
+						broker.getText());
+				p.execute();
+				String content = area.getText();
 
-			while (p.getStatus()) {
 				p.publishMessage(Integer.valueOf(partition.getText()), null, content);
 				p.closeProducer();
+				result.setText("Message Published!");
+			} catch (Exception e) {
+				result.setText(e.toString());
 			}
-			result.setText("message published!");
-		} catch (Exception e) {
-			result.setText(e.toString());
 		}
 	}
 
@@ -60,6 +64,16 @@ public class EventHandlers {
 		} catch (Exception e) {
 			result.setText(e.toString());
 		}
+	}
+
+	public void handleClear(BorderPane pane) {
+		VBox center = (VBox) pane.getCenter();
+		TextArea content = (TextArea) center.getChildren().get(0);
+		content.clear();
+
+		VBox bottom = (VBox) pane.getBottom();
+		TextArea result = (TextArea) bottom.getChildren().get(1);
+		result.clear();
 	}
 
 }

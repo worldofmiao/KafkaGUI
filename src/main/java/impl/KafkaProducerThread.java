@@ -2,9 +2,11 @@ package impl;
 
 import java.util.Properties;
 
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.log4j.Logger;
 
@@ -25,7 +27,7 @@ public class KafkaProducerThread implements Runnable {
 		Properties props = new Properties();
 		props.put("bootstrap.servers", kafkaBrokerURL);
 		props.put("acks", "all");
-		props.put("retries", 0);
+		props.put("retries", 1);
 		props.put("batch.size", 16384);
 		props.put("linger.ms", 1);
 		props.put("buffer.memory", 33554432);
@@ -47,13 +49,25 @@ public class KafkaProducerThread implements Runnable {
 				return;
 			}
 		}
+		LOGGER.debug("Publisher closing..");
+		Thread.currentThread().interrupt();
+		return;
 	}
 
 	public void publishMessage(int partition, String key, String message) {
-		producer.send(new ProducerRecord<String, String>(this.topic, this.partition, this.key, message));
+		LOGGER.debug("trying to publish");
+		producer.send(new ProducerRecord<String, String>(this.topic, this.partition, this.key, message),
+				new Callback() {
+					public void onCompletion(RecordMetadata metadata, Exception e) {
+						if (e != null)
+							e.printStackTrace();
+						System.out.println("The offset of the record we just sent is: " + metadata.offset());
+					}
+				});
 	}
 
 	public void closePublisher() {
+		this.producer.close();
 		this.state = false;
 	}
 
