@@ -1,0 +1,4 @@
+[settings]
+broker = localhost:9092
+topic = gears.vatest.masheens.local
+partition = 0
